@@ -6,10 +6,19 @@ import Clients from "./components/Clients";
 import Footer from "./components/Footer";
 import Header from "./components/header";
 import Hero from "./components/Hero";
+import Offline from "./components/Offline";
 
 export default function App() {
-    const [items, setItems] = React.useState([]);
+    const [items, setItems] = React.useState([]); 
 
+    //tambah state untuk menampung staus online/offline
+    const [offlineStatus, setOfflineStatus] = React.useState(!navigator.onLine);
+
+    //fungsi untuk menghandle status offline/online
+    function handleOfflineStatus(){
+        setOfflineStatus(!navigator.onLine);
+
+    }
     //useEffect: ketika di reload adakan mengambil data dari API
     //UseState memiliki dua parameter, yaitu fungsi dan dependensi list
     React.useEffect(function(){
@@ -23,17 +32,34 @@ export default function App() {
             });
             const {nodes} = await response.json();
             setItems(nodes);
+
+            const script = document.createElement("script");
+            script.src = "/carousel.js";
+            script.async = false;
+            document.body.appendChild(script);
         })();
-    },[]);
+        //ketika pertama kali components dijalankan maka akan mengecek status terlebih dahulu
+        handleOfflineStatus();
+        window.addEventListener('online', handleOfflineStatus);
+        window.addEventListener('offline', handleOfflineStatus)
+
+        //fungsi useeffect akan mendevinisikan components
+        return function(){
+            window.removeEventListener('online', handleOfflineStatus)
+            window.removeEventListener('offline', handleOfflineStatus)
+        }
+    },[offlineStatus]); //dependesi untuk mengecek status, jika hanya utntuk menghandle APi depedensi bisa dikonsongkan.
     return (  
         <>
-        <Header/>
-        <Hero/>
-        <Browse/>
-        <Arrived items={items}/>
-        <Clients/>
-        <AsideMenu/>
-        <Footer/>
+        {offlineStatus && <Offline/>}
+
+            <Header/>
+            <Hero/>
+            <Browse/>
+            <Arrived items={items}/>
+            <Clients/>
+            <AsideMenu/>
+            <Footer/>
         </>
     )
 } 

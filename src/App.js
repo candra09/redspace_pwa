@@ -7,12 +7,16 @@ import Footer from "./components/Footer";
 import Header from "./components/header";
 import Hero from "./components/Hero";
 import Offline from "./components/Offline";
+import Splash from "./pages/Splash";
 
 export default function App() {
     const [items, setItems] = React.useState([]); 
 
     //tambah state untuk menampung staus online/offline
     const [offlineStatus, setOfflineStatus] = React.useState(!navigator.onLine);
+
+    //state splash screen
+    const [isLoading, setIsLoading] = React.useState(true);
 
     //fungsi untuk menghandle status offline/online
     function handleOfflineStatus(){
@@ -43,6 +47,11 @@ export default function App() {
         window.addEventListener('online', handleOfflineStatus);
         window.addEventListener('offline', handleOfflineStatus)
 
+        //splashscreen
+        setTimeout(function(){
+            setIsLoading(false)
+        },3000);
+
         //fungsi useeffect akan mendevinisikan components
         return function(){
             window.removeEventListener('online', handleOfflineStatus)
@@ -51,7 +60,10 @@ export default function App() {
     },[offlineStatus]); //dependesi untuk mengecek status, jika hanya utntuk menghandle APi depedensi bisa dikonsongkan.
     return (  
         <>
-        {offlineStatus && <Offline/>}
+        {isLoading === true? <Splash/> : 
+        (
+            <>
+            {offlineStatus && <Offline/>}
 
             <Header/>
             <Hero/>
@@ -60,6 +72,10 @@ export default function App() {
             <Clients/>
             <AsideMenu/>
             <Footer/>
+            </>
+            
+        )}
+        
         </>
     )
 } 
